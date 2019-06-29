@@ -42,19 +42,6 @@ class UserController {
       email,
       provider,
     };
-
-    /* const updatedUser = await User.update(req.body, {
-      where: {
-        id: req.userId,
-      },
-    });
-    if (!updatedUser) {
-      return res.status(500).json({ error: 'Error Updating!' });
-    }
-    // fetch updated data
-    const returnUpdatedUser = await User.findByPk(req.userId);
-
-    return res.json({ returnUpdatedUser }); */
   }
 }
 export default new UserController();
