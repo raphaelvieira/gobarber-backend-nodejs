@@ -98,6 +98,22 @@ class AppointmentController {
       date,
     });
 
+    /**
+     * Notify appointment Provider
+     */
+
+    const user = await User.findByPk(req.userId);
+    const formattedData = format(
+      hourStart,
+      "'Dia' dd 'de' MMMM', às' H:mm'h'  ",
+      { localale: 'pt' }
+    );
+
+    await Notification.create({
+      content: `Novo agendamento de ${user.name} para o dia ${formattedData}`,
+      user: provider_id,
+    });
+
     return res.json(appointment);
   }
 
