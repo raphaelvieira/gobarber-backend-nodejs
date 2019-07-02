@@ -1,8 +1,9 @@
 import * as Yup from 'yup';
-import { startOfHour, isBefore, parseISO } from 'date-fns';
+import { startOfHour, isBefore, parseISO, format, subHours } from 'date-fns';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
+import Notification from '../schemas/Notification';
 
 class AppointmentController {
   async index(req, res) {
@@ -59,6 +60,12 @@ class AppointmentController {
         .json({ error: 'You can only create appointments with providers' });
     }
 
+    if (checkIsProvider.id !== provider_id) {
+      return res.status(401).json({
+        error: 'You can only create appointments with others providers',
+      });
+    }
+
     /**
      * Check for past dates
      */
@@ -90,6 +97,26 @@ class AppointmentController {
       provider_id,
       date,
     });
+
+    return res.json(appointment);
+  }
+
+  async delete(req, res) {
+    const appointment = await Appointment.findByPk(req.params.id);
+    if (appointment.user_id !== req.userId) {
+      res.status(401).json({
+        error: "You don't have permission to cancel this appointment",
+      });
+    }
+    // get the time less 2 hours ago
+    const dateWithSub = subHours(appointment.date, 2);
+    if (isBefore(dateWithSub, new Date())) {
+      res.status(401).json({
+        error: 'You can only cancel appointmenst 2 hours in advance',
+      });
+    }
+    appointment.cancelled_at = new Date();
+    await appointment.save();
     return res.json(appointment);
   }
 }
