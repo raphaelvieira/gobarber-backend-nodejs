@@ -62,7 +62,7 @@ class AppointmentController {
         .json({ error: 'You can only create appointments with providers' });
     }
 
-    if (checkIsProvider.id === provider_id) {
+    if (checkIsProvider.id === req.userId) {
       return res.status(401).json({
         error: 'You can only create appointments with others providers',
       });
@@ -127,6 +127,11 @@ class AppointmentController {
           as: 'provider',
           attributes: ['name', 'email'],
         },
+        {
+          model: User,
+          as: 'user',
+          attributes: ['name'],
+        },
       ],
     });
 
@@ -146,13 +151,31 @@ class AppointmentController {
     await appointment.save();
 
     /**
-     * Sending e-mail
+     * Send e-mail with template
      */
+    await Mail.sendMail({
+      to: `${appointment.provider.name} <${appointment.provider.email}>`,
+      subject: 'Agendamento cancelado',
+      template: 'cancellation',
+      context: {
+        provider: appointment.provider.name,
+        user: appointment.user.name,
+        date: format(appointment.date, "'Dia' dd 'de' MMMM', às' H:mm'h'  ", {
+          locale: pt,
+        }),
+      },
+    });
+
+    /**
+     * Sending e-mail without template
+
     await Mail.sendMail({
       to: `${appointment.provider.name} <${appointment.provider.email}>`,
       subject: 'Agendamento cancelado',
       text: 'Você tem um novo cancelamento',
     });
+  */
+
     return res.json(appointment);
   }
 }
