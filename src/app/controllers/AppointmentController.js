@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import { startOfHour, isBefore, parseISO, format, subHours } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 import Appointment from '../models/Appointment';
 import User from '../models/User';
 import File from '../models/File';
@@ -61,7 +62,7 @@ class AppointmentController {
         .json({ error: 'You can only create appointments with providers' });
     }
 
-    if (checkIsProvider.id !== provider_id) {
+    if (checkIsProvider.id === provider_id) {
       return res.status(401).json({
         error: 'You can only create appointments with others providers',
       });
@@ -107,7 +108,7 @@ class AppointmentController {
     const formattedData = format(
       hourStart,
       "'Dia' dd 'de' MMMM', às' H:mm'h'  ",
-      { localale: 'pt' }
+      { locale: pt }
     );
 
     await Notification.create({
@@ -120,9 +121,13 @@ class AppointmentController {
 
   async delete(req, res) {
     const appointment = await Appointment.findByPk(req.params.id, {
-      model: User,
-      as: 'provider',
-      attributes: ['name', 'email'],
+      include: [
+        {
+          model: User,
+          as: 'provider',
+          attributes: ['name', 'email'],
+        },
+      ],
     });
 
     if (appointment.user_id !== req.userId) {
