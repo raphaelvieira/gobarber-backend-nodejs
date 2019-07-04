@@ -34,8 +34,15 @@ class Queue {
   processQueue() {
     jobs.forEach(job => {
       const { bee, handle } = this.queues[job.key];
-      bee.process(handle);
+      // envent on failed, this.execute handleFailure
+      bee.on('failed', this.handleFailure).process(handle);
+      // bee.process(handle);
     });
+  }
+
+  handleFailure(job, err) {
+    // eslint-disable-next-line no-console
+    console.log(`Queue ${job.queue.name}: FAILED`, err);
   }
 }
 
