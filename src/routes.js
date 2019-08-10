@@ -13,6 +13,11 @@ import SessionController from './app/controllers/SessionController';
 import FileController from './app/controllers/FileController';
 import authMiddleware from './app/middlewares/auth';
 
+import validateAppointmentStore from './app/validators/AppointmentStore';
+import validateSessionStore from './app/validators/SessionStore';
+import validateUserStore from './app/validators/UserStore';
+import validateUserUpdate from './app/validators/UserUpdate';
+
 const routes = new Router();
 const upload = multer(multerConfig);
 
@@ -23,8 +28,13 @@ const bruteStore = new BruteRedis({
 });
 const bruteForce = new Brute(bruteStore);
 
-routes.post('/sessions', bruteForce.prevent, SessionController.store);
-routes.post('/users', UserController.store);
+routes.post(
+  '/sessions',
+  validateSessionStore,
+  bruteForce.prevent,
+  SessionController.store
+);
+routes.post('/users', validateUserStore, UserController.store);
 // global middleware
 routes.use(authMiddleware);
 
@@ -33,12 +43,16 @@ routes.use(authMiddleware);
 
 routes.post('/files', upload.single('file'), FileController.store);
 
-routes.put('/users', UserController.update);
+routes.put('/users', validateUserUpdate, UserController.update);
 routes.get('/providers/:providerId/available', AvailableController.index);
 routes.get('/providers', ProviderController.index);
 routes.get('/schedule', ScheduleController.index);
 routes.get('/appointments', AppointmentController.index);
-routes.post('/appointments', AppointmentController.store);
+routes.post(
+  '/appointments',
+  validateAppointmentStore,
+  AppointmentController.store
+);
 routes.delete('/appointments/:id', AppointmentController.delete);
 routes.get('/notifications', NotificationController.index);
 routes.put('/notifications/:id', NotificationController.update);
