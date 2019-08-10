@@ -40,7 +40,7 @@ class CancelAppointmentService {
       appointment,
     });
     /** Invalidade Cache */
-    await Cache.invalidatePrefix(`user:${user_id}:appointments:`);
+    await Cache.invalidatePrefix(`user:${user_id}:appointments`);
 
     return appointment;
   }

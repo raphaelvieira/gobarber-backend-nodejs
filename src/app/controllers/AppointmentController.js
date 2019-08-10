@@ -50,7 +50,7 @@ class AppointmentController {
 
   async store(req, res) {
     const { provider_id, date } = req.body;
-    const appointment = await CreateAppointmentService({
+    const appointment = await CreateAppointmentService.run({
       provider_id,
       user_id: req.userId,
       date,
@@ -59,7 +59,7 @@ class AppointmentController {
   }
 
   async delete(req, res) {
-    const appointment = await CancelAppointmentService({
+    const appointment = await CancelAppointmentService.run({
       provider_id: req.params.id,
       user_id: req.userId,
     });

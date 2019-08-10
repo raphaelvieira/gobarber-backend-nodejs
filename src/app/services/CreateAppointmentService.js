@@ -69,7 +69,7 @@ class CreateAppointmentService {
     });
 
     /** Invalidade Cache */
-    await Cache.invalidatePrefix(`user:${user.id}:appointments:`);
+    await Cache.invalidatePrefix(`user:${user.id}:appointments`);
 
     return appointment;
   }
